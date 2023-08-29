@@ -1,0 +1,122 @@
+\documentclass[12pt]{article}
+
+\newcommand{\reporttitle}{Title}
+\newcommand{\accentcolor}{solarized-orange}
+\newcommand{\urlcolor}{solarized-blue}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Tau}{\mathcal{T}}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem*{theorem*}{Theorem}
+
+\usepackage{courier}
+\usepackage{listings}
+
+\lstdefinestyle{default}{
+	basicstyle=\ttfamily\color{solarized-base01},
+	breakatwhitespace=false,
+	breaklines=true,
+	keepspaces=true,
+	showspaces=false,
+	showstringspaces=false,
+	showtabs=false,
+	tabsize=2
+}
+
+\lstdefinestyle{matlab}{
+	commentstyle=\color{solarized-green},
+	keywordstyle=\color{solarized-blue},
+	stringstyle=\color{solarized-orange},
+	basicstyle=\ttfamily\color{solarized-base01},
+	breakatwhitespace=false,
+	breaklines=true,
+	captionpos=b,
+	keepspaces=true,
+	showspaces=false,
+	language=matlab,
+	showstringspaces=false,
+	showtabs=false,
+	tabsize=4
+}
+
+\lstset{style=default}
+
+\usepackage{nameref}
+\usepackage{multicol}
+\usepackage{titlesec}
+
+\usepackage{graphicx}
+\graphicspath{{../gallery/}}
+
+\usepackage{xcolor-solarized}
+\usepackage{pagecolor}
+\color{solarized-base02}
+\pagecolor{solarized-base3}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage[a4paper]{geometry}
+\geometry{
+	inner=20mm,
+	outer=20mm,
+	top=30mm,
+	bottom=30mm,
+	heightrounded,
+	marginparwidth=50pt,
+	marginparsep=20pt,
+	headsep=25pt,
+	headheight=30pt
+}
+
+\usepackage{hyperref}
+\hypersetup{
+	linktocpage=true,
+	colorlinks=true,
+	linkcolor=\accentcolor,
+	urlcolor=\urlcolor,
+	pdftitle={\reporttitle},
+	pdfpagemode=FullScreen,
+	pdfauthor={Andrea Di Antonio}
+}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{Andrea Di Antonio}
+\fancyhead[L]{\reporttitle}
+\fancyfoot[C]{\thepage}
+
+\title{\reporttitle}
+\author{Andrea Di Antonio, 858798 \\ \hyperlink{mailto:a.diantonio1@campus.unimib.it}{a.diantonio1@campus.unimib.it}}
+\date{Exam session of July 27, 2023 \\ Academic Year 2022-23}
+
+\setcounter{tocdepth}{2}
+
+\begin{document}
+	\pagenumbering{roman}
+	\maketitle
+	\thispagestyle{fancy}
+
+	\begin{abstract}
+		\begin{center}
+			Abstract, to be written.
+		\end{center}
+	\end{abstract}
+
+	\newpage
+	\tableofcontents
+
+	\newpage
+	\pagenumbering{arabic}
+	\section{First section}
+	
+\end{document}

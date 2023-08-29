@@ -1,0 +1,15 @@
+# MATLAB
+
+**/*.asv
+
+# LaTeX
+
+report/output
+
+# Final package.
+
+package
+
+# Others.
+
+**/.DS_Store
