@@ -204,13 +204,13 @@ function [solution, error, geometry] = solver(mesh, approximate, show)
 	
     	% Builds the matrices.
 		A(dofgg, dofgg) = A(dofgg, dofgg) + KE;
-    	B(dofp, dofgg) = BE;
+    	B(dofp, dofgg) = B(dofp, dofgg) + BE;
 
 		% Builds the RHS.
 		b(dofgg) = b(dofgg) + fE;
 		
 		% Multipliers.
-		areaVector(dofp) = ME;
+		areaVector(dofp) = areaVector(dofp) + ME;
 	end
 
 	% Homogeneus DBCs.
