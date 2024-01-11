@@ -11,5 +11,4 @@ function z = pressurebasis(index, x, y)
         	z = x - xc;
     	case 3
         	z = y - yc;
-	end
 end

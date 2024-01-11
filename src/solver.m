@@ -65,7 +65,7 @@ function [solution, error, geometry] = solver(mesh, approximate, show)
 	
 	for i = 1:7
     	for q = 1:Nq
-        	[gx,gy] = gradbasis(i, xhq(q), yhq(q));
+        	[gx, gy] = gradbasis(i, xhq(q), yhq(q));
         	gphihqx(i, q) = gx;
         	gphihqy(i, q) = gy;
     	end
@@ -111,6 +111,7 @@ function [solution, error, geometry] = solver(mesh, approximate, show)
 		% Local matrices.
 		sKE = zeros(7, 7); % Single KE.
 		BE = zeros(3, 14);
+		ME = zeros(3, 1);
 		
 		% Stiffness matrix quadrature.
 		for i = 1:7
@@ -189,6 +190,17 @@ function [solution, error, geometry] = solver(mesh, approximate, show)
         	fE(i) = 2 * area * fE(i);
         	fE(i + 7) = 2 * area * fE(i + 7);
 		end
+
+		% Multiplier quadrature.
+		for i = 1:3
+			for q = 1:Nq
+				tmp = jacob * [xhq(q); yhq(q)] + [X(1); Y(1)];
+
+				ME(i) = ME(i) + pphihq(i, q) * whq(q);
+			end
+
+			ME(i) = 2 * area * ME(i);
+		end
 	
     	% Builds the matrices.
 		A(dofgg, dofgg) = A(dofgg, dofgg) + KE;
@@ -198,7 +210,7 @@ function [solution, error, geometry] = solver(mesh, approximate, show)
 		b(dofgg) = b(dofgg) + fE;
 		
 		% Multipliers.
-		areaVector(dofp) = area * ones(3, 1);
+		areaVector(dofp) = ME;
 	end
 
 	% Homogeneus DBCs.

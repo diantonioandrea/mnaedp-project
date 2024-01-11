@@ -20,5 +20,4 @@ function z = exact(x, y, index)
 		case 5 % Second component.
 			z = pi * [1/2 * (cos(y)^2) * (-sin(x)^2 + cos(x)^2); ...
 				-cos(x) * sin(x) * cos(y) * sin(y)];
-	end
 end

@@ -19,5 +19,4 @@ function z = basis(index, x, y)
 		% Bubble.
 		case 4
         z = 27 * x * y * (1 - x - y);
-	end
 end

@@ -9,7 +9,7 @@ function errorsPlot(approximate)
 		approximate = [];
 	end
 
-	tiledlayout(3, 1);
+	tiledlayout(1, 3);
 	fprintf("Stokes CR errors.\n\n");
 
 	data = load("quadmeshes.mat");
