@@ -13,6 +13,6 @@ function z = loading(index, x, y)
 		% Second component.
 		case 2
 			z = (-pi^2) * sin(x) * cos(x) * ...
-				(1-4 * (cos(y))^2) + pi * cos(y);
+				(1 - 4 * (cos(y))^2) + pi * cos(y);
 	end
 end

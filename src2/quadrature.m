@@ -1,8 +1,8 @@
 % Quadrature nodes on the reference element for a given
 % quadrature order.
 
-function [xhq,yhq,whq] = quadrature(fdq)
-	switch fdq
+function [xhq, yhq, whq] = quadrature(order)
+	switch order
     	case 2
         	q = [
             	0.1666666666667   0.6666666666667  0.6666666666667

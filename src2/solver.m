@@ -42,42 +42,43 @@ function output = solver(input)
 	nu = input.nu;
 
 	% Quadrature informations.
-	[xhq, yhq, whq] = quadrature(5);
-	Nq = length(xhq);
+	[xQ, yQ, wQ] = quadrature(5);
+	nQ = length(xQ);
 
 	% Velocity base size;
-	velBase = 7;
+	vBase = 7;
 
 	% Basis functions at quadrature nodes on the reference
 	% element.
-	velPhiQ = zeros(velBase, Nq);
+	vPhiQ = zeros(vBase, nQ);
 
-	for i = 1:velBase
-    	for q = 1:Nq
-        	velPhiQ(i,q) = basis(i, xhq(q), yhq(q));
+	for i = 1:vBase
+    	for q = 1:nQ
+        	vPhiQ(i,q) = basis(i, xQ(q), yQ(q));
     	end
 	end
 
 	% Pressure basis functions at quadrature nodes on the reference
 	% element.
-	prePhiQ = zeros(3, Nq);
+	pPhiQ = zeros(3, nQ);
 
 	for i = 1:3
-    	for q = 1:Nq
-        	prePhiQ(i,q) = pressureBasis(i, xhq(q), yhq(q));
+    	for q = 1:nQ
+        	pPhiQ(i,q) = pressureBasis(i, xQ(q), yQ(q));
     	end
 	end
 
 	% Gradient of basis functions at quadrature nodes on the
 	% reference element.
-	gradVelPhiQX = zeros(velBase, Nq);
-	gradVelPhiQY = zeros(velBase, Nq);
+	gVPhiQX = zeros(vBase, nQ);
+	gVPhiQY = zeros(vBase, nQ);
 	
-	for i = 1:velBase
-    	for q = 1:Nq
-        	[gx, gy] = gradBasis(i, xhq(q), yhq(q));
-        	gradVelPhiQX(i, q) = gx;
-        	gradVelPhiQY(i, q) = gy;
+	for i = 1:vBase
+    	for q = 1:nQ
+        	[gx, gy] = gradBasis(i, xQ(q), yQ(q));
+
+        	gVPhiQX(i, q) = gx;
+        	gVPhiQY(i, q) = gy;
     	end
 	end
 
@@ -116,7 +117,7 @@ function output = solver(input)
 			xv(vertex(2)), ...
 			xv(vertex(3))];
 
-		y= [yv(vertex(1)), ...
+		y = [yv(vertex(1)), ...
 			yv(vertex(2)), ...
 			yv(vertex(3))];
 
@@ -129,99 +130,97 @@ function output = solver(input)
 		area = 0.5 * det(jac);
 
 		% Local matrices.
-		KE = zeros(2 * velBase, 2 * velBase);
-		BE = zeros(3, 2 * velBase);
+		sKE = zeros(vBase);
+		BE = zeros(3, 2 * vBase);
 		LE = zeros(3, 1);
-		fE = zeros(2 * velBase, 1);
+		fE = zeros(2 * vBase, 1);
 
 		% Stiffness matrix quadrature.
-		for i = 1:velBase
+		for i = 1:vBase
 			for j = 1:i-1
-				KE(i, j) = KE(j, i);
+				sKE(i, j) = sKE(j, i);
 			end
 
-			for j = i:velBase
-				for q = 1:Nq
-					temp = dot((invJacT * [gradVelPhiQX(j, q); gradVelPhiQY(j, q)]), ...
-						(invJacT * [gradVelPhiQX(j, q); gradVelPhiQY(j, q)]));
+			for j = i:vBase
+				for q = 1:nQ
+					temp = dot(invJacT * [gVPhiQX(j, q); gVPhiQY(j, q)], ...
+						invJacT * [gVPhiQX(j, q); gVPhiQY(j, q)]);
 
-					KE(i, j) = KE(i, j) + nu * temp * whq(q);
+					sKE(i, j) = sKE(i, j) + nu * temp * wQ(q);
 				end
 
-				KE(i, j) = 2 * area * KE(i, j);
+				sKE(i, j) = 2 * area * sKE(i, j);
 			end
 		end
 
-		KE(velBase + (1:velBase), velBase + (1:velBase)) = KE(1:velBase, 1:velBase);
+		% Duplicates scalar stiffness matrix.
+		KE = kron(eye(2), sKE);
 
 		% Mixed matrix quadrature.
-		for i = 1:(2 * velBase)
+		for i = 1:(2 * vBase)
 			for j = 1:3
-				if i < velBase + 0.5
-					temp = (invJacT(1, 1:2) * [gradVelPhiQX(i, q); ...
-						gradVelPhiQY(i, q)]) * prePhiQ(j, q);
-				else
-					temp = (invJacT(2, 1:2) * [gradVelPhiQX(i - velBase, q); ...
-						gradVelPhiQY(i - velBase, q)]) * prePhiQ(j, q);
+				for q = 1:nQ
+					if i < (vBase + 0.5)
+						temp = (invJacT(1, 1:2) * [gVPhiQX(i, q); ...
+							gVPhiQY(i, q)]) * pPhiQ(j, q);
+					else
+						temp = (invJacT(2, 1:2) * [gVPhiQX(i - vBase, q); ...
+							gVPhiQY(i - vBase, q)]) * pPhiQ(j, q);
+					end
+				
+					BE(j, i) = BE(j, i) + temp * wQ(q);
 				end
-			
-				BE(j, i) = BE(j, i) + temp * whq(q);
-			end
 
-			BE(j, i) = 2 * area * BE(j, i);
+				BE(j, i) = 2 * area * BE(j, i);
+			end
 		end
 
 		% Loading term quadrature.
-		for i = 1:velBase
-			for q = 1:Nq
-				temp = jac * [xhq(q); yhq(q)] + [x(1); y(1)];
+		for i = 1:vBase
+			for q = 1:nQ
+				temp = jac * [xQ(q); yQ(q)] + [x(1); y(1)];
 
 				xq = temp(1);
 				yq = temp(2);
 
-				fE(i) = fE(i) + loading(1, xq, yq) * velPhiQ(i, q) * whq(q);
-				fE(i + velBase) = fE(i + velBase) + ...
-					loading(2, xq, yq) * velPhiQ(i, q) * whq(q);
+				fE(i) = fE(i) + loading(1, xq, yq) * vPhiQ(i, q) * wQ(q);
+				fE(i + vBase) = fE(i + vBase) + ...
+					loading(2, xq, yq) * vPhiQ(i, q) * wQ(q);
 			end
 
 			fE(i) = 2 * area * fE(i);
-			fE(i + velBase) = 2 * area * fE(i + velBase);
+			fE(i + vBase) = 2 * area * fE(i + vBase);
 		end
 
 		% Multiplier quadrature.
 		for i = 1:3
-			for q = 1:Nq
-				LE(i) = LE(i) + prePhiQ(i, q) * whq(q);
+			for q = 1:nQ
+				LE(i) = LE(i) + pPhiQ(i, q) * wQ(q);
 			end
 
 			LE(i) = 2 * area * LE(i);
 		end
 
 		% Local to global DOFs.
-		velDofsIndexes = [vertex(1), vertex(2), vertex(3), ...
+		vDIndexes = [vertex(1), vertex(2), vertex(3), ...
 			veNum + edge(1), veNum + edge(2), veNum + edge(3), ...
 			veNum + edNum + index];
 
-		doubleVelDofsIndexes = [velDofsIndexes, velDofs + velDofsIndexes];
+		dVDIndexes = [vDIndexes, velDofs + vDIndexes];
 
-		preDofsIndexes = [0, 1, 2] * elNum + index;
+		pDIndexes = [0, 1, 2] * elNum + index;
 
 		% Assembly.
-		A(doubleVelDofsIndexes, doubleVelDofsIndexes) = ...
-			A(doubleVelDofsIndexes, doubleVelDofsIndexes) + KE;
-
-		B(preDofsIndexes, doubleVelDofsIndexes) = ...
-			B(preDofsIndexes, doubleVelDofsIndexes) + BE;
-		   
-        b(doubleVelDofsIndexes) = b(doubleVelDofsIndexes) + fE;
-
-		L(preDofsIndexes) = L(preDofsIndexes) + LE;
+		A(dVDIndexes, dVDIndexes) = A(dVDIndexes, dVDIndexes) + KE;
+		B(pDIndexes, dVDIndexes) = B(pDIndexes, dVDIndexes) + BE;
+        b(dVDIndexes) = b(dVDIndexes) + fE;
+		L(pDIndexes) = L(pDIndexes) + LE;
 	end
 
 	% BCs.
 	if input.approximate == 1
 		noBubble = 1:1:(veNum + edNum);
-		noBubble = [noBubble, dofs + noBubble];
+		noBubble = [noBubble, velDofs + noBubble];
 
 		A = A(noBubble, noBubble);
 		B = B(:, noBubble);
@@ -247,20 +246,16 @@ function output = solver(input)
 	A = sparse(A);
 	B = sparse(B);
 
-    interns = length(intern);
-
 	Ah = A(intern, intern); clear A;
 	Bh = B(:, intern); clear B;
 	fh = b(intern); clear b;
 
-	% Global matrix.
+	% Global matrix and RHS.
 	Kh = [Ah, Bh'; Bh, zeros(preDofs)];
-	Kh = sparse(Kh);
-
-    % RHS.
     fh = [fh; zeros(preDofs, 1)];
     
 	% Multiplier conditions.
+	interns = length(intern);
 	Kh = [Kh, [zeros(interns, 1); L]; ...
 		[zeros(1, interns), L', 0]];
 	fh = [fh; 0];
