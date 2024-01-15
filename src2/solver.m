@@ -230,16 +230,16 @@ function output = solver(input)
 		iEdges = setdiff(1:1:edNum, bEdges);
 
 		intern = [iVertices, veNum + iEdges];
-		intern = [intern, veNum + edNum + intern];
-
+		
 		velDofs = veNum + edNum;
 	else
 		iVertices = setdiff(1:1:veNum, bVertices);
 		iEdges = setdiff(1:1:edNum, bEdges);
 
 		intern = [iVertices, veNum + iEdges, veNum + edNum + (1:1:elNum)];
-		intern = [intern, velDofs + intern];
 	end
+
+	intern = [intern, velDofs + intern];
 
 	A = sparse(A);
 	B = sparse(B);
@@ -334,7 +334,7 @@ function output = solver(input)
 			% uh, first and second component, gradient's values.
 			uhG1V = [0; 0];
 			uhG2V = [0; 0];
-			
+
 			for j = 1:vBase
 				uh1V = uh1V + uT1(j) * vPhiQ(j, q);
 				uh2V = uh2V + uT2(j) * vPhiQ(j, q);
