@@ -232,15 +232,13 @@ function output = solver(input)
 		intern = [iVertices, veNum + iEdges];
 		intern = [intern, veNum + edNum + intern];
 
-		uh = zeros(2 * (veNum + edNum), 1);
+		velDofs = veNum + edNum;
 	else
 		iVertices = setdiff(1:1:veNum, bVertices);
 		iEdges = setdiff(1:1:edNum, bEdges);
 
 		intern = [iVertices, veNum + iEdges, veNum + edNum + (1:1:elNum)];
 		intern = [intern, velDofs + intern];
-
-		uh = zeros(2 * velDofs, 1);
 	end
 
 	A = sparse(A);
@@ -264,18 +262,240 @@ function output = solver(input)
 	solh = Kh \ fh;
 
 	% Extracts uh and ph.
+	uh = zeros(2 * velDofs, 1);
 	uh(intern) = solh(1:interns);
 	uh = reshape(uh, length(uh) / 2, 2);
 	ph = solh(interns+1:interns+preDofs);
 
+	% Errors evaluation.
+	if input.approximate == 1
+		vBase = vBase - 1;
+	end
+
+	l2Error = 0;
+	h1Error = 0;
+	l2ErrorP = 0;
+
+	for index = 1:elNum
+		% Vertices informations.
+		vertex = [vertices(index, 1), ...
+			vertices(index, 2), ...
+			vertices(index, 3)];
+
+		% Edges informations.
+		edge = [edges(index, 1), ...
+			edges(index, 2), ...
+			edges(index, 3)];
+
+		% Coordinates.
+		x = [xv(vertex(1)), ...
+			xv(vertex(2)), ...
+			xv(vertex(3))];
+
+		y = [yv(vertex(1)), ...
+			yv(vertex(2)), ...
+			yv(vertex(3))];
+
+		% Jacobian and derivates.
+		jac = [x(2) - x(1), x(3) - x(1); y(2) - y(1), y(3) - y(1)];
+		invJac = inv(jac);
+		invJacT = invJac';
+
+		% Element's area.
+		area = 0.5 * det(jac);
+
+		% Local to global DOFs.
+		if input.approximate == 1
+			vDIndexes = [vertex(1), vertex(2), vertex(3), ...
+				veNum + edge(1), veNum + edge(2), veNum + edge(3)];
+		else
+			vDIndexes = [vertex(1), vertex(2), vertex(3), ...
+				veNum + edge(1), veNum + edge(2), veNum + edge(3), ...
+				veNum + edNum + index];
+		end
+
+		pDIndexes = [0, 1, 2] * elNum + index;
+		
+		% Solutions at dofs.
+		uT1 = uh(vDIndexes, 1);
+		uT2 = uh(vDIndexes, 2);
+		pT = ph(pDIndexes);
+
+		% Partials.
+		l2Err = 0;
+		h1Err = 0;
+		l2ErrP = 0;
+
+		for q = 1:nQ
+			% uh, first and second component, values.
+			uh1V = 0;
+			uh2V = 0;
+
+			% uh, first and second component, gradient's values.
+			uhG1V = [0; 0];
+			uhG2V = [0; 0];
+			
+			for j = 1:vBase
+				uh1V = uh1V + uT1(j) * vPhiQ(j, q);
+				uh2V = uh2V + uT2(j) * vPhiQ(j, q);
+
+				uhG1V = uhG1V + uT1(j) * (invJacT * ...
+					[gVPhiQX(j, q); gVPhiQY(j, q)]);
+				uhG2V = uhG2V + uT2(j) * (invJacT * ...
+					[gVPhiQX(j, q); gVPhiQY(j, q)]);
+			end
+
+			% ph values.
+			phV = pT(1) * pPhiQ(1, q) + ...
+				pT(2) * pPhiQ(2, q) + ...
+				pT(3) * pPhiQ(3, q);
+
+			% Gauss node on the element.
+			node = jac * [xQ(q); yQ(q)] + [x(1); y(1)];
+
+			xq = node(1);
+			yq = node(2);
+
+			% Error on node.
+			l2Err = l2Err + (exact(1, xq, yq) - uh1V) ^ 2 * wQ(q) + ...
+				(exact(2, xq, yq) - uh2V) ^ 2 * wQ(q);
+
+			h1Err = h1Err + norm(exact(3, xq, yq) - uhG1V) ^ 2 * wQ(q) + ...
+				norm(exact(4, xq, yq) - uhG2V) ^ 2 * wQ(q);
+
+			l2ErrP = l2ErrP + (exact(5, xq, yq) - phV) ^ 2 * wQ(q);
+
+		end
+
+		l2Err = l2Err * 2 * area;
+		h1Err = h1Err * 2 * area;
+		l2ErrP = l2ErrP * 2 * area;
+
+		% Total error (squared).
+		l2Error = l2Error + l2Err;
+		h1Error = h1Error + h1Err;
+		l2ErrorP = l2ErrorP + l2ErrP;
+	end
+
+	% Mesh size.
+	diameter = 0;
+
+	for j = 1:length(mesh.endpoints)
+		x1 = mesh.xv(mesh.endpoints(j, 1));
+    	y1 = mesh.yv(mesh.endpoints(j, 1));
+    	x2 = mesh.xv(mesh.endpoints(j, 2));
+    	y2 = mesh.yv(mesh.endpoints(j, 2));
+
+		edge = pdist([x1, y1; x2, y2], "euclidean");
+
+		if edge > diameter
+			diameter = edge;
+		end
+	end
+
 	% Output.
+
+	% Input.
 	output.input = input;
-    
+
+	% Matrices.
     output.matrices.Kh = Kh;
     output.matrices.Ah = Ah;
     output.matrices.Bh = Bh;
     output.matrices.fh = fh;
 
+	% Solution.
 	output.solution.uh = uh;
 	output.solution.ph = ph;
+
+	% Error.
+	output.error.l2 = sqrt(l2Error);
+	output.error.h1 = sqrt(h1Error);
+	output.error.l2P = sqrt(l2ErrorP);
+
+	% Geometry.
+	output.geometry.size = diameter;
+	output.geometry.dofs = length(fh);
+
+	% Plot, if requested.
+	if input.show == 1
+		tiledlayout(2, 2);
+
+		% Velocity plot on vertices dofs.
+		% Numerical vs analytical.
+		nexttile;
+
+		quiver(xv, yv, uh(1:veNum, 1), ...
+			uh(1:veNum, 2));
+
+		hold on;
+		title("Numerical velocity");
+		hold off;
+		
+		nexttile;
+
+		uex = zeros(veNum, 1);
+		uey = zeros(veNum, 1);
+
+		for i = 1:veNum
+			uex(i) = exact(1, xv(i), yv(i));
+			uey(i) = exact(2, xv(i), yv(i));
+		end
+
+		quiver(xv, yv, uex, uey);
+
+		hold on;
+		title("Analytical velocity");
+		hold off;
+
+		% Pressure plot on centroids.
+		nexttile;
+
+		for k = 1:elNum
+			hold on;
+
+			indexes = vertices(k, 1:3)';
+
+			pressure = ph(k) * ...
+				ones(length(indexes) + 1, 1);
+			
+			triangle = [xv(indexes), yv(indexes); ...
+				xv(indexes(1)), yv(indexes(1))];
+
+			fill3(triangle(:, 1), triangle(:, 2), ...
+				pressure, pressure);
+		end
+
+		view(2);
+		grid on;
+		colorbar;
+		title("Numerical pressure");
+		hold off;
+
+		nexttile;
+
+		for k = 1:elNum
+			hold on;
+
+			indexes = vertices(k, 1:3)';
+			
+			xc = sum(xv(indexes)) / 3;
+			yc = sum(yv(indexes)) / 3;
+
+			pressure = exact(5, xc, yc) * ...
+				ones(length(indexes) + 1, 1);
+			
+			triangle = [xv(indexes), yv(indexes); ...
+				xv(indexes(1)), yv(indexes(1))];
+
+			fill3(triangle(:, 1), triangle(:, 2), ...
+				pressure, pressure);
+		end
+
+		view(2);
+		grid on;
+		colorbar;
+		title("Analytical pressure");
+		hold off;
+	end
 end
