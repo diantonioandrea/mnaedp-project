@@ -194,8 +194,6 @@ function [solution, error, geometry] = solver(mesh, approximate, show)
 		% Multiplier quadrature.
 		for i = 1:3
 			for q = 1:Nq
-				tmp = jacob * [xhq(q); yhq(q)] + [X(1); Y(1)];
-
 				ME(i) = ME(i) + pphihq(i, q) * whq(q);
 			end
 
