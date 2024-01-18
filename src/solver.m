@@ -3,382 +3,368 @@
 
 % Adapted from Lorenzo Mascotto's P2-P0 and Mini codes.
 
-function [solution, error, geometry] = solver(mesh, approximate, show)
+function output = solver(input)
 	% Solves the Stokes problem given a mesh.
-	
-	% Arguments.
-	narginchk(1, 3);
 
-	if nargin < 2
-		approximate = [];
+	% Input check.
+	narginchk(0, 1);
+
+	% Fixes input.
+	if nargin == 0
+		data = load("quadmeshes.mat");
+
+		output.mesh = data.mesh;
+
+		output.nu = 1;
+		output.approximate = 0;
+		output.show = 0;
+
+		return;
 	end
 
-	if nargin < 3
-		show = [];
-	end
+	% Mesh informations.
+	mesh = input.mesh;
 
-	% Extracts geometric information from the given mesh.
-	xv = mesh.xv; % Vertices' x.
-	yv = mesh.yv; % Vertices' y.
+	xv = mesh.xv;
+	yv = mesh.yv;
+
 	vertices = mesh.vertices;
 	edges = mesh.edges;
-	endpoints = mesh.endpoints;
-	boundary = mesh.boundary;
-	boundedges = mesh.boundedges;
+
+	bVertices = mesh.boundary; % Boundary vertices.
+	bEdges = mesh.boundedges; % Boundary edges.
+
+	veNum = length(xv); % Vertices' number.
+	edNum = size(mesh.endpoints, 1); % Edges' number.
+	elNum = size(vertices, 1); % Elements' number.
 
 	% Viscosity constant.
-	nu = 1;
+	nu = input.nu;
 
-	% Quadrature nodes.
-	[xhq, yhq, whq] = quadrature(5);
-	Nq = length(xhq);
+	% Quadrature informations.
+	[xQ, yQ, wQ] = quadrature(5);
+	nQ = length(xQ);
 
-	% Constants.
-	verticesNumber = length(xv);
-	edgesNumber = size(endpoints, 1);
-	elementsNumber = size(vertices, 1);
+	% Velocity base size;
+	vBase = 7;
 
 	% Basis functions at quadrature nodes on the reference
 	% element.
-	phihq = zeros(7, Nq);
+	vPhiQ = zeros(vBase, nQ);
 
-	for i = 1:7
-    	for q = 1:Nq
-        	phihq(i,q) = basis(i, xhq(q), yhq(q));
+	for i = 1:vBase
+    	for q = 1:nQ
+        	vPhiQ(i,q) = basis(i, xQ(q), yQ(q));
     	end
 	end
 
 	% Pressure basis functions at quadrature nodes on the reference
 	% element.
-	pphihq = zeros(3, Nq);
+	pPhiQ = zeros(3, nQ);
 
 	for i = 1:3
-    	for q = 1:Nq
-        	pphihq(i,q) = pressurebasis(i, xhq(q), yhq(q));
+    	for q = 1:nQ
+        	pPhiQ(i,q) = pressureBasis(i, xQ(q), yQ(q));
     	end
 	end
 
 	% Gradient of basis functions at quadrature nodes on the
 	% reference element.
-	gphihqx = zeros(7, Nq);
-	gphihqy = zeros(7, Nq);
+	gVPhiQX = zeros(vBase, nQ);
+	gVPhiQY = zeros(vBase, nQ);
 	
-	for i = 1:7
-    	for q = 1:Nq
-        	[gx, gy] = gradbasis(i, xhq(q), yhq(q));
-        	gphihqx(i, q) = gx;
-        	gphihqy(i, q) = gy;
+	for i = 1:vBase
+    	for q = 1:nQ
+        	[gx, gy] = gradBasis(i, xQ(q), yQ(q));
+
+        	gVPhiQX(i, q) = gx;
+        	gVPhiQY(i, q) = gy;
     	end
 	end
 
-	% Matrices.
+	% DOFs numbers.
+	velDofs = veNum + edNum + elNum;
+	preDofs = 3 * elNum;
 
-	% Stiffness matrix.
-	A = zeros(2 * (verticesNumber + edgesNumber + elementsNumber));
+	% Matrices definition.
 	
-	% Mixed matrix.
-	B = zeros(3 * elementsNumber, ...
-		2 * (verticesNumber + edgesNumber + elementsNumber));
+	% Stiffness.
+	A = zeros(2 * velDofs);
 
-	% Loading part.
-	b = zeros(2 * (verticesNumber + edgesNumber + ... 
-		elementsNumber), 1);
-	
-	% Zero average constraint.
-	areaVector = zeros(3 * elementsNumber, 1);
+	% Mixed.
+	B = zeros(preDofs, 2 * velDofs);
+
+	% Loading term.
+	b = zeros(2 * velDofs, 1);
+
+	% Multiplier.
+	L = zeros(preDofs, 1);
 
 	% Assembly.
-	for index = 1:elementsNumber
-		% Vertices information.
-		vertex = [vertices(index, 1), vertices(index, 2), ...
+	for index = 1:elNum
+		% Vertices informations.
+		vertex = [vertices(index, 1), ...
+			vertices(index, 2), ...
 			vertices(index, 3)];
-		
-		X = [xv(vertex(1)), xv(vertex(2)), xv(vertex(3))];
-		Y = [yv(vertex(1)), yv(vertex(2)), yv(vertex(3))];
 
-		% Jacobian.
-		jacob = [X(2) - X(1), X(3) - X(1); Y(2) - Y(1), Y(3) - Y(1)];
+		% Edges informations.
+		edge = [edges(index, 1), ...
+			edges(index, 2), ...
+			edges(index, 3)];
 
-		% Inverse Jacobian.
-		invJacob = inv(jacob);
+		% Coordinates.
+		x = [xv(vertex(1)), ...
+			xv(vertex(2)), ...
+			xv(vertex(3))];
 
-		% Transpose inverse Jacobian.
-		invJacobT = invJacob';
+		y = [yv(vertex(1)), ...
+			yv(vertex(2)), ...
+			yv(vertex(3))];
 
-		% Area.
-		area = 0.5 * det(jacob);	
+		% Jacobian and derivates.
+		jac = [x(2) - x(1), x(3) - x(1); y(2) - y(1), y(3) - y(1)];
+		invJac = inv(jac);
+		invJacT = invJac';
+
+		% Element's area.
+		area = 0.5 * det(jac);
 
 		% Local matrices.
-		sKE = zeros(7, 7); % Single KE.
-		BE = zeros(3, 14);
-		ME = zeros(3, 1);
-		
+		sKE = zeros(vBase);
+		BE = zeros(3, 2 * vBase);
+		LE = zeros(3, 1);
+		fE = zeros(2 * vBase, 1);
+
 		% Stiffness matrix quadrature.
-		for i = 1:7
+		for i = 1:vBase
 			for j = 1:i-1
-				sKE(i,j) = sKE(j,i);
+				sKE(i, j) = sKE(j, i);
 			end
 
-        	for j = i:7
-				for q = 1:Nq
-                	tmp = dot((invJacobT * [gphihqx(j, q); gphihqy(j, q)]),...
-                    	(invJacobT * [gphihqx(i, q); gphihqy(i, q)]));
+			for j = i:vBase
+				for q = 1:nQ
+					temp = dot(invJacT * [gVPhiQX(j, q); gVPhiQY(j, q)], ...
+						invJacT * [gVPhiQX(i, q); gVPhiQY(i, q)]);
 
-                	sKE(i,j) = sKE(i,j) + nu * tmp * whq(q);
+					sKE(i, j) = sKE(i, j) + nu * temp * wQ(q);
 				end
 
-            	sKE(i, j) = 2 * area * sKE(i, j);
-        	end
+				sKE(i, j) = 2 * area * sKE(i, j);
+			end
 		end
 
 		% Duplicates scalar stiffness matrix.
 		KE = kron(eye(2), sKE);
 
 		% Mixed matrix quadrature.
-		for i = 1:14
+		for i = 1:(2 * vBase)
 			for j = 1:3
-				for q = 1:Nq
-					if i < 7.5
-                    		tmp = (invJacobT(1, 1:2) * ...
-								[gphihqx(i, q); gphihqy(i, q)]) * ...
-                        		pphihq(j, q);
-            		elseif i > 7.5
-                    		tmp = (invJacobT(2, 1:2) * ...
-								[gphihqx(i - 7, q); gphihqy(i - 7, q)])*...
-                        		pphihq(j, q);
+				for q = 1:nQ
+					if i < (vBase + 0.5)
+						temp = (invJacT(1, 1:2) * [gVPhiQX(i, q); ...
+							gVPhiQY(i, q)]) * pPhiQ(j, q);
+					else
+						temp = (invJacT(2, 1:2) * [gVPhiQX(i - vBase, q); ...
+							gVPhiQY(i - vBase, q)]) * pPhiQ(j, q);
 					end
-                	
-					BE(j,i) = BE(j,i) + tmp * whq(q);
+				
+					BE(j, i) = BE(j, i) + temp * wQ(q);
 				end
 
-            	BE(j,i) = 2 * area * BE(j,i);
+				BE(j, i) = 2 * area * BE(j, i);
 			end
 		end
 
-		% Edges information.
-		edge = [edges(index, 1), edges(index, 2), edges(index, 3)];
-
-		% 'Local to global' arrays of dofs.
-		dofg = [vertex(1), vertex(2), vertex(3), ...
-			verticesNumber + index, ...
-			verticesNumber + elementsNumber + edge(1), ...
-			verticesNumber + elementsNumber + edge(2), ...
-			verticesNumber + elementsNumber + edge(3)];
-
-		dofgg = [dofg, dofg + verticesNumber + edgesNumber + ...
-			elementsNumber];
-
-		dofp = [0, elementsNumber, 2 * elementsNumber] + index;
-		
 		% Loading term quadrature.
-    	fE = zeros(14, 1);
-	
-		for i = 1:7
-			for q = 1:Nq
-            	tmp = jacob * [xhq(q); yhq(q)] + [X(1); Y(1)];
+		for i = 1:vBase
+			for q = 1:nQ
+				temp = jac * [xQ(q); yQ(q)] + [x(1); y(1)];
 
-            	xq = tmp(1);
-            	yq = tmp(2);
+				xq = temp(1);
+				yq = temp(2);
 
-            	fE(i) = fE(i) + loading(xq, yq, 1) * ...
-					phihq(i, q) * whq(q);
-
-				fE(i + 7) = fE(i + 7) + loading(xq, yq, 2) * ...
-					phihq(i, q) * whq(q);
+				fE(i) = fE(i) + loading(1, xq, yq) * vPhiQ(i, q) * wQ(q);
+				fE(i + vBase) = fE(i + vBase) + ...
+					loading(2, xq, yq) * vPhiQ(i, q) * wQ(q);
 			end
 
-        	fE(i) = 2 * area * fE(i);
-        	fE(i + 7) = 2 * area * fE(i + 7);
+			fE(i) = 2 * area * fE(i);
+			fE(i + vBase) = 2 * area * fE(i + vBase);
 		end
 
 		% Multiplier quadrature.
 		for i = 1:3
-			for q = 1:Nq
-				ME(i) = ME(i) + pphihq(i, q) * whq(q);
+			for q = 1:nQ
+				LE(i) = LE(i) + pPhiQ(i, q) * wQ(q);
 			end
 
-			ME(i) = 2 * area * ME(i);
+			LE(i) = 2 * area * LE(i);
 		end
-	
-    	% Builds the matrices.
-		A(dofgg, dofgg) = A(dofgg, dofgg) + KE;
-    	B(dofp, dofgg) = B(dofp, dofgg) + BE;
 
-		% Builds the RHS.
-		b(dofgg) = b(dofgg) + fE;
-		
-		% Multipliers.
-		areaVector(dofp) = areaVector(dofp) + ME;
+		% Local to global DOFs.
+		vDIndexes = [vertex(1), vertex(2), vertex(3), ...
+			veNum + edge(1), veNum + edge(2), veNum + edge(3), ...
+			veNum + edNum + index];
+
+		dVDIndexes = [vDIndexes, velDofs + vDIndexes];
+
+		pDIndexes = [0, 1, 2] * elNum + index;
+
+		% Assembly.
+		A(dVDIndexes, dVDIndexes) = A(dVDIndexes, dVDIndexes) + KE;
+		B(pDIndexes, dVDIndexes) = B(pDIndexes, dVDIndexes) + BE;
+        b(dVDIndexes) = b(dVDIndexes) + fE;
+		L(pDIndexes) = L(pDIndexes) + LE;
 	end
 
-	% Homogeneus DBCs.
-	if ~(isempty(approximate)) % P2 approximation.
-		% Strips bubble.
-		dofs = verticesNumber + elementsNumber + edgesNumber;
-		bubble = setdiff(1:1:dofs, verticesNumber + (1:1:elementsNumber));
-			
-		bubble = [bubble, verticesNumber + elementsNumber ...
-			+ edgesNumber + bubble];
+	% BCs.
+	if input.approximate == 1
+		noBubble = 1:1:(veNum + edNum);
+		noBubble = [noBubble, velDofs + noBubble];
 
-		A = A(bubble, bubble);
-		B = B(:, bubble);
-		b = b(bubble);
+		A = A(noBubble, noBubble);
+		B = B(:, noBubble);
+		b = b(noBubble);
+
+		iVertices = setdiff(1:1:veNum, bVertices);
+		iEdges = setdiff(1:1:edNum, bEdges);
+
+		intern = [iVertices, veNum + iEdges];
 		
-		% BCs on P2 approximation.
-		nodesI = setdiff(1:1:verticesNumber, boundary);
-		edgesI = setdiff(1:1:edgesNumber, boundedges);
-		NL = [nodesI, verticesNumber + edgesI];
-		NL = [NL, verticesNumber + edgesNumber + NL];
-
-		uh = zeros(2 * (verticesNumber + edgesNumber), 1);
-
+		velDofs = veNum + edNum;
 	else
-		% Standard BCs.
-		nodesI = setdiff(1:1:verticesNumber+elementsNumber, boundary);
-		edgesI = setdiff(1:1:edgesNumber, boundedges);
-		NL = [nodesI, verticesNumber + elementsNumber + edgesI];
-		NL = [NL, verticesNumber + edgesNumber + elementsNumber + NL];
+		iVertices = setdiff(1:1:veNum, bVertices);
+		iEdges = setdiff(1:1:edNum, bEdges);
 
-		uh = zeros(2 * (verticesNumber + edgesNumber + elementsNumber), 1);
+		intern = [iVertices, veNum + iEdges, veNum + edNum + (1:1:elNum)];
 	end
 
-	% Matrices without DBCs.
-	Ah = A(NL, NL); clear A;
-	Bh = B(:, NL); clear B;
-	fh = b(NL); clear b;
+	intern = [intern, velDofs + intern];
 
-	% Sparse matrices.
-	Ah = sparse(Ah);
-	Bh = sparse(Bh);
-	fh = [fh; zeros(3 * elementsNumber, 1)];
+	A = sparse(A);
+	B = sparse(B);
 
-	% Global matrix.
-	Kh = [Ah, Bh'; Bh, zeros(3 * elementsNumber)];
-	
-	% Multiplier conditions on homogeneus DBCs.
-	N = length(NL);
-	Kh = [Kh, [zeros(N,1); areaVector]; [zeros(1, N), areaVector', 0]];
+	Ah = A(intern, intern); clear A;
+	Bh = B(:, intern); clear B;
+	fh = b(intern); clear b;
+
+	% Global matrix and RHS.
+	Kh = [Ah, Bh'; Bh, zeros(preDofs)];
+    fh = [fh; zeros(preDofs, 1)];
+    
+	% Multiplier conditions.
+	interns = length(intern);
+	Kh = [Kh, [zeros(interns, 1); L]; ...
+		[zeros(1, interns), L', 0]];
 	fh = [fh; 0];
 
 	% Linear system solution.
-	Kh = sparse(Kh); % Probably redundant.
 	solh = Kh \ fh;
 
-	% Extracts the two components of the velocity and
-	% pressure.
-	uh(NL) = solh(1:N);
+	% Extracts uh and ph.
+	uh = zeros(2 * velDofs, 1);
+	uh(intern) = solh(1:interns);
 	uh = reshape(uh, length(uh) / 2, 2);
-	ph = solh(N+1:(N+(3*elementsNumber)));
+	ph = solh(interns+1:interns+preDofs);
 
-	% Solution data.
-	solution = struct;
-
-	solution.uh = uh;
-	solution.ph = ph;
-
-	% Error evaluation.
-	error = struct;
+	% Errors evaluation.
+	if input.approximate == 1
+		vBase = vBase - 1;
+	end
 
 	l2Error = 0;
 	h1Error = 0;
 	l2ErrorP = 0;
 
-	for index = 1:elementsNumber
-		% Vertices information.
-		vertex = [vertices(index, 1), vertices(index, 2), ...
+	for index = 1:elNum
+		% Vertices informations.
+		vertex = [vertices(index, 1), ...
+			vertices(index, 2), ...
 			vertices(index, 3)];
-		
-		X = [xv(vertex(1)), xv(vertex(2)), xv(vertex(3))];
-		Y = [yv(vertex(1)), yv(vertex(2)), yv(vertex(3))];
 
-		% Jacobian.
-		jacob = [X(2) - X(1), X(3) - X(1); Y(2) - Y(1), Y(3) - Y(1)];
+		% Edges informations.
+		edge = [edges(index, 1), ...
+			edges(index, 2), ...
+			edges(index, 3)];
 
-		% Inverse Jacobian.
-		invJacob = inv(jacob);
+		% Coordinates.
+		x = [xv(vertex(1)), ...
+			xv(vertex(2)), ...
+			xv(vertex(3))];
 
-		% Transpose inverse Jacobian.
-		invJacobT = invJacob';
+		y = [yv(vertex(1)), ...
+			yv(vertex(2)), ...
+			yv(vertex(3))];
 
-		% Area.
-		area = 0.5 * det(jacob);
+		% Jacobian and derivates.
+		jac = [x(2) - x(1), x(3) - x(1); y(2) - y(1), y(3) - y(1)];
+		invJac = inv(jac);
+		invJacT = invJac';
 
-		% Edges information.
-		edge = [edges(index, 1), edges(index, 2), edges(index, 3)];
+		% Element's area.
+		area = 0.5 * det(jac);
 
-		% 'Local to global' arrays of dofs.
-		if isempty(approximate)
-			dofg = [vertex(1), vertex(2), vertex(3), ...
-				verticesNumber + index, ...
-				verticesNumber + elementsNumber + edge(1), ...
-				verticesNumber + elementsNumber + edge(2), ...
-				verticesNumber + elementsNumber + edge(3)];
+		% Local to global DOFs.
+		if input.approximate == 1
+			vDIndexes = [vertex(1), vertex(2), vertex(3), ...
+				veNum + edge(1), veNum + edge(2), veNum + edge(3)];
 		else
-			dofg = [vertex(1), vertex(2), vertex(3), ...
-				verticesNumber + edge(1), ...
-				verticesNumber + edge(2), ...
-				verticesNumber + edge(3)];
+			vDIndexes = [vertex(1), vertex(2), vertex(3), ...
+				veNum + edge(1), veNum + edge(2), veNum + edge(3), ...
+				veNum + edNum + index];
 		end
 
-		dofp = [0, elementsNumber, 2 * elementsNumber] + index;
-
+		pDIndexes = [0, 1, 2] * elNum + index;
+		
 		% Solutions at dofs.
-		uT1 = uh(dofg, 1);
-		uT2 = uh(dofg, 2);
-		pT = ph(dofp);
+		uT1 = uh(vDIndexes, 1);
+		uT2 = uh(vDIndexes, 2);
+		pT = ph(pDIndexes);
 
 		% Partials.
 		l2Err = 0;
 		h1Err = 0;
 		l2ErrP = 0;
 
-		% Quadrature.
-		for q = 1:Nq
+		for q = 1:nQ
 			% uh, first and second component, values.
-			uh1 = 0;
-			uh2 = 0;
+			uh1V = 0;
+			uh2V = 0;
 
 			% uh, first and second component, gradient's values.
-			uhg1 = [0; 0];
-			uhg2 = [0; 0];
-			
-			% Velocity.
-			j = 1;
+			uhG1V = [0; 0];
+			uhG2V = [0; 0];
 
-			for i = 1:7
-				if i == 4 & ~(isempty(approximate))
-					continue;
-				end
+			for j = 1:vBase
+				uh1V = uh1V + uT1(j) * vPhiQ(j, q);
+				uh2V = uh2V + uT2(j) * vPhiQ(j, q);
 
-				uh1 = uh1 + uT1(j) * phihq(i, q);
-				uh2 = uh2 + uT2(j) * phihq(i, q);
-
-				uhg1 = uhg1 + uT1(j) * (invJacobT * ...
-					[gphihqx(i, q); gphihqy(i, q)]);
-				uhg2 = uhg2 + uT2(j) * (invJacobT * ...
-					[gphihqx(i, q); gphihqy(i, q)]);
-
-				j = j + 1;
+				uhG1V = uhG1V + uT1(j) * (invJacT * ...
+					[gVPhiQX(j, q); gVPhiQY(j, q)]);
+				uhG2V = uhG2V + uT2(j) * (invJacT * ...
+					[gVPhiQX(j, q); gVPhiQY(j, q)]);
 			end
 
 			% ph values.
-			phv = pT(1) * pphihq(1, q) + ...
-				pT(2) * pphihq(2, q) + ...
-				pT(3) * pphihq(3, q);
-			
+			phV = pT(1) * pPhiQ(1, q) + ...
+				pT(2) * pPhiQ(2, q) + ...
+				pT(3) * pPhiQ(3, q);
+
 			% Gauss node on the element.
-			node = jacob * [xhq(q); yhq(q)] + [X(1); Y(1)];
+			node = jac * [xQ(q); yQ(q)] + [x(1); y(1)];
+
 			xq = node(1);
 			yq = node(2);
 
-			% Partial error.
-			l2Err = l2Err + (exact(xq, yq, 1) - uh1) ^ 2 * whq(q) + ...
-				(exact(xq, yq, 2) - uh2) ^ 2 * whq(q);
+			% Error on node.
+			l2Err = l2Err + (exact(1, xq, yq) - uh1V) ^ 2 * wQ(q) + ...
+				(exact(2, xq, yq) - uh2V) ^ 2 * wQ(q);
 
-			h1Err = h1Err + norm(exact(xq, yq, 4) - uhg1) ^ 2 * whq(q) + ...
-				norm(exact(xq, yq, 5) - uhg2) ^ 2 * whq(q);
+			h1Err = h1Err + norm(exact(3, xq, yq) - uhG1V) ^ 2 * wQ(q) + ...
+				norm(exact(4, xq, yq) - uhG2V) ^ 2 * wQ(q);
 
-			l2ErrP = l2ErrP + (exact(xq, yq, 3) - phv) ^ 2 * whq(q);
+			l2ErrP = l2ErrP + (exact(5, xq, yq) - phV) ^ 2 * wQ(q);
+
 		end
 
 		l2Err = l2Err * 2 * area;
@@ -390,18 +376,8 @@ function [solution, error, geometry] = solver(mesh, approximate, show)
 		h1Error = h1Error + h1Err;
 		l2ErrorP = l2ErrorP + l2ErrP;
 	end
-	
-	% Error data.
-	error.l2 = sqrt(l2Error);
-	error.h1 = sqrt(h1Error);
-	error.l2P = sqrt(l2ErrorP);
 
-	% Geometry data.
-	geometry = struct;
-	
-	geometry.mesh = mesh;
-	geometry.elements = elementsNumber;
-	
+	% Mesh size.
 	diameter = 0;
 
 	for j = 1:length(mesh.endpoints)
@@ -417,19 +393,40 @@ function [solution, error, geometry] = solver(mesh, approximate, show)
 		end
 	end
 
-	geometry.diameter = diameter;
-	geometry.dofs = length(fh);
+	% Output.
+
+	% Input.
+	output.input = input;
+
+	% Matrices.
+    output.matrices.Kh = Kh;
+    output.matrices.Ah = Ah;
+    output.matrices.Bh = Bh;
+    output.matrices.fh = fh;
+
+	% Solution.
+	output.solution.uh = uh;
+	output.solution.ph = ph;
+
+	% Error.
+	output.error.l2 = sqrt(l2Error);
+	output.error.h1 = sqrt(h1Error);
+	output.error.l2P = sqrt(l2ErrorP);
+
+	% Geometry.
+	output.geometry.size = diameter;
+	output.geometry.dofs = length(fh);
 
 	% Plot, if requested.
-	if ~(isempty(show))
+	if input.show == 1
 		tiledlayout(2, 2);
 
 		% Velocity plot on vertices dofs.
 		% Numerical vs analytical.
 		nexttile;
 
-		quiver(xv, yv, uh(1:verticesNumber, 1), ...
-			uh(1:verticesNumber, 2));
+		quiver(xv, yv, uh(1:veNum, 1), ...
+			uh(1:veNum, 2));
 
 		hold on;
 		title("Numerical velocity");
@@ -437,14 +434,14 @@ function [solution, error, geometry] = solver(mesh, approximate, show)
 		
 		nexttile;
 
-		uex = zeros(verticesNumber, 1);
-		uey = zeros(verticesNumber, 1);
-	
-		for i = 1:verticesNumber
-			uex(i) = exact(xv(i), yv(i), 1);
-			uey(i) = exact(xv(i), yv(i), 2);
+		uex = zeros(veNum, 1);
+		uey = zeros(veNum, 1);
+
+		for i = 1:veNum
+			uex(i) = exact(1, xv(i), yv(i));
+			uey(i) = exact(2, xv(i), yv(i));
 		end
-	
+
 		quiver(xv, yv, uex, uey);
 
 		hold on;
@@ -454,7 +451,7 @@ function [solution, error, geometry] = solver(mesh, approximate, show)
 		% Pressure plot on centroids.
 		nexttile;
 
-		for k = 1:elementsNumber
+		for k = 1:elNum
 			hold on;
 
 			indexes = vertices(k, 1:3)';
@@ -477,7 +474,7 @@ function [solution, error, geometry] = solver(mesh, approximate, show)
 
 		nexttile;
 
-		for k = 1:elementsNumber
+		for k = 1:elNum
 			hold on;
 
 			indexes = vertices(k, 1:3)';
@@ -485,7 +482,7 @@ function [solution, error, geometry] = solver(mesh, approximate, show)
 			xc = sum(xv(indexes)) / 3;
 			yc = sum(yv(indexes)) / 3;
 
-			pressure = exact(xc, yc, 3) * ...
+			pressure = exact(5, xc, yc) * ...
 				ones(length(indexes) + 1, 1);
 			
 			triangle = [xv(indexes), yv(indexes); ...

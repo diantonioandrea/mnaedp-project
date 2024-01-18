@@ -1,19 +1,20 @@
 % Errors plotter.
 % Andrea Di Antonio, 858798
 
-function errorsPlot(approximate)
+function errorsPlot(~)
 	% Arguments.
 	narginchk(0, 1);
-
-	if nargin < 1
-		approximate = [];
-	end
 
 	tiledlayout(1, 3);
 	fprintf("Stokes CR errors.\n\n");
 
 	data = load("quadmeshes.mat");
+    input = solver();
 	meshes = [data.mesh, data.mesh1, data.mesh2, data.mesh3];
+
+    if nargin > 0
+		input.approximate = 1;
+    end
 	
 	l2Errors = zeros(4, 1);
 	h1Errors = zeros(4, 1);
@@ -24,13 +25,15 @@ function errorsPlot(approximate)
 	for j = 1:4
 		fprintf("Solving over mesh: %d\n", j);
 
-		[~, err, geom] = solver(meshes(j), approximate);
+        input.mesh = meshes(j);
 
-		l2Errors(j) = err.l2;
-		h1Errors(j) = err.h1;
-		l2ErrorsP(j) = err.l2P;
+		output = solver(input);
+
+		l2Errors(j) = output.error.l2;
+		h1Errors(j) = output.error.h1;
+		l2ErrorsP(j) = output.error.l2P;
 		
-		sizes(j) = geom.diameter;
+		sizes(j) = output.geometry.size;
 	end
 
 	% L2 error (velocity).
