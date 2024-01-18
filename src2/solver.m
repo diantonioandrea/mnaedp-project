@@ -144,7 +144,7 @@ function output = solver(input)
 			for j = i:vBase
 				for q = 1:nQ
 					temp = dot(invJacT * [gVPhiQX(j, q); gVPhiQY(j, q)], ...
-						invJacT * [gVPhiQX(j, q); gVPhiQY(j, q)]);
+						invJacT * [gVPhiQX(i, q); gVPhiQY(i, q)]);
 
 					sKE(i, j) = sKE(i, j) + nu * temp * wQ(q);
 				end
