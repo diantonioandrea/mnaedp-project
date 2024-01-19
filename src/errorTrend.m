@@ -1,7 +1,7 @@
 % Errors plotter.
 % Andrea Di Antonio, 858798
 
-function errorsPlot(~)
+function errorTrend(~)
 	% Arguments.
 	narginchk(0, 1);
 
@@ -58,7 +58,7 @@ function errorsPlot(~)
 		"y--", "DisplayName", "Cubic slope", ...
 		"LineWidth", 1.5);
 
-	fprintf("\nVelocity, L2 Error fit: %f\n", coeffs(1));
+	fprintf("\nVelocity, L2 Error fit: %.2f\n", coeffs(1));
 	
 	title("L^2 Error: Velocity")
 
@@ -88,7 +88,7 @@ function errorsPlot(~)
 		"b--", "DisplayName", "Quadratic slope", ...
 		"LineWidth", 1.5);
 
-	fprintf("Velocity, H1 Error fit: %f\n", coeffs(1));
+	fprintf("Velocity, H1 Error fit: %.2f\n", coeffs(1));
 	
 	title("H^1 Error: Velocity")
 
@@ -107,9 +107,6 @@ function errorsPlot(~)
 	hold on;
 
 	coeffs = polyfit(log(sizes), log(l2ErrorsP), 1);
-	loglog(sizes, exp(coeffs(2)) * (sizes .^ coeffs(1)), ...
-		"r--", "DisplayName", "Polynomial interpolation", ...
-		"LineWidth", 1.5);
 
 	loglog(sizes, sizes, ...
 		"g--", "DisplayName", "Linear slope", ...
@@ -118,7 +115,14 @@ function errorsPlot(~)
 		"b--", "DisplayName", "Quadratic slope", ...
 		"LineWidth", 1.5);
 
-	fprintf("Pressure, L2 Error fit: %f\n", coeffs(1));
+	fprintf("Pressure, L2 Error fit: %.2f\n", coeffs(1));
+
+	coeffs = polyfit(log(sizes(2:end)), log(l2ErrorsP(2:end)), 1);
+	loglog(sizes, exp(coeffs(2)) * (sizes .^ coeffs(1)), ...
+		"r--", "DisplayName", "Tail polynomial interpolation", ...
+		"LineWidth", 1);
+
+	fprintf("Pressure, L2 Tail error fit: %.2f\n", coeffs(1));
 	
 	title("L^2 Error: Pressure")
 
@@ -128,4 +132,8 @@ function errorsPlot(~)
 	legend("Location", "northwest");
 
 	hold off;
+
+	% % Exports plots.
+	% exportgraphics(gcf, '../gallery/errorTrend.pdf', ...
+	% 		'ContentType', 'vector');
 end
