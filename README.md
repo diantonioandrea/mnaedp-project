@@ -16,5 +16,5 @@ Implementazione dell'elemento di Crouzeix-Raviart per il problema di Stokes con 
     - `/src/loading.m` Sorgente.
     - `/src/exact.m` Soluzione esatta per la sorgente assegnata.
     - `/src/quadrature.m` Nodi di quadratura per l'elemento di riferimento.
-    - `/src/errorsPlot.m` Grafici per l'andamento degli errori.
+    - `/src/errorTrend.m` Grafici per l'andamento degli errori.
     - `/src/quadmeshes.mat` Varie mesh.
