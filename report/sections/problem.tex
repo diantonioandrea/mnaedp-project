@@ -1,0 +1,57 @@
+\subsection{Strong Formulation}
+
+Let $\Omega = [0, 1] \times [0, 1] \subset \mathbb{R}^2$ denote our domain. We aim to find $\vec{u} \in [C^2(\Omega)]^2$ and $p \in C^1(\Omega)$ such that, given $\vec{f} \in [C(\Omega)]^2$, the following holds:
+
+\begin{gather}
+    \begin{cases} \label{strong_stokes}
+        - \Delta \vec{u} - \nabla p = \vec{f}, \\
+        \diver \vec{u} = 0,
+    \end{cases}
+\end{gather}
+
+where:
+
+\begin{gather}
+    \Delta \vec{u} = \begin{pmatrix}
+        u_{1, xx} + u_{1, yy} \\
+        u_{2, xx} + u_{2, yy}
+    \end{pmatrix} .
+\end{gather}
+
+\subsection{Weak Formulation}
+
+We now seek $\vec{u} \in [H^1_0(\Omega)]^2 = V$ and $p \in L^2_0(\Omega) = Q$ such that, given $\vec{f} \in V^*$, we have:
+
+\begin{gather} \label{weak_stokes}
+    \begin{cases}
+        \boa(\vec{u}, \vec{v}) + \bob(\vec{v}, p) = \langle \vec{f}, \vec{v} \rangle & \Forall \vec{v} \in V,\\
+        \bob(\vec{u}, q) = 0 & \Forall q \in Q,
+    \end{cases}
+\end{gather}
+
+where $\boa: V \times V \rightarrow \mathbb{R}$ and $\bob: V \times Q \rightarrow \mathbb{R}$ are defined as follows:
+
+\begin{gather}
+    \boa(\vec{u}, \vec{v}) = \int_{\Omega} \nabla \vec{u} : \nabla \vec{v} ~ d \omega, \\
+    \bob(\vec{v}, p) = \int_{\Omega} \diver \vec{v} p ~ d \omega.
+\end{gather}
+
+Let $Z = \{\vec{v} \in V: \bob(\vec{v}, q) = 0 \Forall q \in Q\}$. We aim to find $\vec{u} \in Z$ satisfying:
+
+\begin{gather}
+    \begin{cases}
+        \boa(\vec{u}, \vec{v}) = \langle \vec{f}, \vec{v} \rangle & \Forall \vec{v} \in V
+    \end{cases}
+\end{gather}
+
+This problem is well-posed provided that there exist $\alpha, \beta \in \mathbb{R}_+$ such that:
+
+\begin{gather}
+    \boa(\vec{u}, \vec{u}) \geq \alpha \lVert \vec{u} \rVert^2_V \quad \Forall \vec{u} \in Z,
+\end{gather}
+
+and:
+
+\begin{gather}
+    \sup_{\vec{v} \in V} \frac{\bob(\vec{v}, q)}{\lVert \vec{v} \rVert_V} \geq \beta \lVert q \rVert_Q \quad \Forall q \in Q.
+\end{gather}
