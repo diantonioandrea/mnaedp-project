@@ -5,8 +5,10 @@
 \newcommand{\urlcolor}{solarized-blue}
 
 \usepackage{amsmath}
+\usepackage{mathrsfs}
 \usepackage{amsthm}
 \usepackage{amsfonts}
+\usepackage{bm}
 \usepackage{amssymb}
 \usepackage{stmaryrd}
 
@@ -15,26 +17,45 @@
 \newcommand{\RT}{\mathbb{R}^2}
 \newcommand{\N}{\mathbb{N}}
 
-\newcommand{\LT}{\mathcal{L}^2}
+\newcommand{\PK}[1]{\mathbb{P}_{#1}}
+
+\newcommand{\LT}{\mathscr{L}^2}
 \newcommand{\Tau}{\mathcal{T}}
+
+% Vectors and operators.
+\newcommand{\Vector}[1]{\vec{#1}}
+\newcommand{\Operator}[1]{\bm{#1}}
 
 % Matrices.
 \newcommand{\MA}{\mathcal{A}}
 \newcommand{\MB}{\mathcal{B}}
+\newcommand{\VF}{\mathcal{F}}
 
 % Gradient and divergence.
-\newcommand{\grad}{\vec{\nabla}}
-\DeclareMathOperator{\diver}{div}
+\newcommand{\grad}{\Vector{\nabla}}
+\newcommand{\diver}{\text{div }}
+
+% Span.
+\newcommand{\Span}[1]{\text{span} \left\{ #1 \right\}}
 
 % Bilinear operators.
-\newcommand{\boa}{a}
-\newcommand{\bob}{b}
+\newcommand{\boa}[2]{\Operator{a}(#1, #2)}
+\newcommand{\bob}[2]{\Operator{b}(#1, #2)}
+
+% Fortin.
+\newcommand{\tfortin}{\Operator{\tilde{\Pi}}}
+\newcommand{\fortin}{\Operator{\Pi}}
+\newcommand{\fortinptpz}{\Operator{\Pi^2_0}}
 
 % Redefinition.
 \newcommand{\Exists}{\exists ~}
 \newcommand{\Forall}{\forall ~}
 
-\newtheorem{theorem}{Theorem}
+% Theorems.
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{proposition}{Proposition}[section]
+
 \newtheorem*{theorem*}{Theorem}
 
 \usepackage{courier}
@@ -51,27 +72,29 @@
 	tabsize=2
 }
 
-\lstdefinestyle{matlab}{
-	commentstyle=\color{solarized-green},
-	keywordstyle=\color{solarized-blue},
-	stringstyle=\color{solarized-orange},
-	basicstyle=\ttfamily\color{solarized-base01},
-	breakatwhitespace=false,
-	breaklines=true,
-	captionpos=b,
-	keepspaces=true,
-	showspaces=false,
-	language=matlab,
-	showstringspaces=false,
-	showtabs=false,
-	tabsize=4
-}
+% \lstdefinestyle{matlab}{
+% 	commentstyle=\color{solarized-green},
+% 	keywordstyle=\color{solarized-blue},
+% 	stringstyle=\color{solarized-orange},
+% 	basicstyle=\ttfamily\color{solarized-base01},
+% 	breakatwhitespace=false,
+% 	breaklines=true,
+% 	captionpos=b,
+% 	keepspaces=true,
+% 	showspaces=false,
+% 	language=matlab,
+% 	showstringspaces=false,
+% 	showtabs=false,
+% 	tabsize=4
+% }
 
 \lstset{style=default}
 
 \usepackage{nameref}
 \usepackage{multicol}
 \usepackage{titlesec}
+
+\usepackage{enumerate}
 
 \usepackage{graphicx}
 \graphicspath{{../gallery/}}
@@ -135,11 +158,19 @@
 
 	\newpage
 	\pagenumbering{arabic}
-	\section{The Stokes Problem}
+	\section{Formulations of the Stokes Problem}
 	\input{sections/problem.tex}
 
 	\newpage
-	\section{FEM Discretization}
+	\section{Finite Element Discretization}
 	\input{sections/fem.tex}
+
+	\newpage
+	\section{Crouzeix-Raviart Element}
+	\input{sections/cr.tex}
+
+	\newpage
+	\section{Tests}
+	\input{sections/tests.tex}
 
 \end{document}

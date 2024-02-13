@@ -1,0 +1,26 @@
+We are now evaluating the behavior of the $\LT$ and $H^1$ velocity errors, as well as the $\LT$ pressure error, on various meshes as the mesh size decreases.\footnote{Linear slope will be represented in \textcolor{solarized-green}{green}, quadratic slope in \textcolor{solarized-blue}{blue}, and cubic slope in \textcolor{solarized-red}{red}.}
+
+\subsection{Error trend}
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[width=15cm]{errorTrend.pdf}
+	\caption{Error trend.}
+\end{figure}
+
+\newpage
+\subsection{Bubbleless error trend}
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[width=15cm]{errorTrendNB.pdf}
+	\caption{Bubbleless error trend.}
+\end{figure}
+
+\newpage
+\subsection{Polynomial fits}
+
+Here are the results for the polynomial fits. Given the relatively high pressure error on the initial mesh, an additional fit is performed solely on the tail. 
+
+\lstinputlisting[caption=Polynomial fits.]{../results/errorTrend.txt}
+\lstinputlisting[caption=Bubbleless polynomial fits.]{../results/errorTrendNB.txt}

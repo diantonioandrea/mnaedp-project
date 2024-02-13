@@ -1,57 +1,57 @@
-\subsection{Strong Formulation}
+\subsection{Strong formulation}
 
-Let $\Omega = [0, 1] \times [0, 1] \subset \mathbb{R}^2$ denote our domain. We aim to find $\vec{u} \in [C^2(\Omega)]^2$ and $p \in C^1(\Omega)$ such that, given $\vec{f} \in [C(\Omega)]^2$, the following holds:
+Let $\Omega = [0, 1] \times [0, 1] \subset \mathbb{R}^2$ denote our domain. We aim to find $\Vector{u} \in \left[ C^2(\Omega) \right]^2$ and $p \in C^1(\Omega)$ such that, given $\Vector{f} \in \left[ C(\Omega) \right]^2$, the following holds:
 
 \begin{gather}
     \begin{cases} \label{strong_stokes}
-        - \Delta \vec{u} - \nabla p = \vec{f}, \\
-        \diver \vec{u} = 0,
+        - \Delta \Vector{u} - \grad p = \Vector{f} & \Forall \Vector{x} \in \Omega, \\
+        \diver \Vector{u} = 0 & \Forall \Vector{x} \in \partial \Omega,
     \end{cases}
 \end{gather}
 
 where:
 
 \begin{gather}
-    \Delta \vec{u} = \begin{pmatrix}
+    \Delta \Vector{u} = \begin{pmatrix}
         u_{1, xx} + u_{1, yy} \\
         u_{2, xx} + u_{2, yy}
     \end{pmatrix} .
 \end{gather}
 
-\subsection{Weak Formulation}
+\subsection{Weak formulation}
 
-We now seek $\vec{u} \in [H^1_0(\Omega)]^2 = V$ and $p \in L^2_0(\Omega) = Q$ such that, given $\vec{f} \in V^*$, we have:
+We now seek $\Vector{u} \in \left[ H^1_0(\Omega) \right]^2 = V$ and $p \in L^2_0(\Omega) = Q$ such that, given $\Vector{f} \in V^*$, we have:
 
 \begin{gather} \label{weak_stokes}
     \begin{cases}
-        \boa(\vec{u}, \vec{v}) + \bob(\vec{v}, p) = \langle \vec{f}, \vec{v} \rangle & \Forall \vec{v} \in V,\\
-        \bob(\vec{u}, q) = 0 & \Forall q \in Q,
+        \boa{\Vector{u}}{\Vector{v}} + \bob{\Vector{v}}{p} = \langle \Vector{f}, \Vector{v} \rangle & \Forall \Vector{v} \in V,\\
+        \bob{\Vector{u}}{q} = 0 & \Forall q \in Q,
     \end{cases}
 \end{gather}
 
-where $\boa: V \times V \rightarrow \mathbb{R}$ and $\bob: V \times Q \rightarrow \mathbb{R}$ are defined as follows:
+where $\boa{\cdot}{\cdot}: V \times V \rightarrow \mathbb{R}$ and $\bob{\cdot}{\cdot}: V \times Q \rightarrow \mathbb{R}$ are defined as follows:
 
-\begin{gather}
-    \boa(\vec{u}, \vec{v}) = \int_{\Omega} \nabla \vec{u} : \nabla \vec{v} ~ d \omega, \\
-    \bob(\vec{v}, p) = \int_{\Omega} \diver \vec{v} p ~ d \omega.
-\end{gather}
+\begin{align}
+    \boa{\Vector{u}}{\Vector{v}} &= \int_{\Omega} \grad \Vector{u} : \grad \Vector{v} ~ d \omega, \label{a} \\
+    \bob{\Vector{v}}{p} &= \int_{\Omega} \diver \Vector{v} ~ p ~ d \omega. \label{b}
+\end{align}
 
-Let $Z = \{\vec{v} \in V: \bob(\vec{v}, q) = 0 \Forall q \in Q\}$. We aim to find $\vec{u} \in Z$ satisfying:
+Let $Z = \{\Vector{v} \in V: \bob(\Vector{v}, q) = 0 \Forall q \in Q\}$. We aim to find $\Vector{u} \in Z$ satisfying:
 
-\begin{gather}
-    \begin{cases}
-        \boa(\vec{u}, \vec{v}) = \langle \vec{f}, \vec{v} \rangle & \Forall \vec{v} \in V
-    \end{cases}
+\begin{gather} \label{kernel_stokes}
+    \boa{\Vector{u}}{\Vector{v}} = \langle \Vector{f}, \Vector{v} \rangle \quad \Forall \Vector{v} \in V
 \end{gather}
 
 This problem is well-posed provided that there exist $\alpha, \beta \in \mathbb{R}_+$ such that:
 
-\begin{gather}
-    \boa(\vec{u}, \vec{u}) \geq \alpha \lVert \vec{u} \rVert^2_V \quad \Forall \vec{u} \in Z,
+\begin{gather} \label{coercivity}
+    \boa{\Vector{u}}{\Vector{v}} \geq \alpha \lVert \Vector{u} \rVert^2_V \quad \Forall \Vector{u} \in Z,
 \end{gather}
 
 and:
 
-\begin{gather}
-    \sup_{\vec{v} \in V} \frac{\bob(\vec{v}, q)}{\lVert \vec{v} \rVert_V} \geq \beta \lVert q \rVert_Q \quad \Forall q \in Q.
+\begin{gather} \label{inf-sup}
+    \sup_{\Vector{v} \in V} \frac{\bob{\Vector{v}}{q}}{\lVert \Vector{v} \rVert_V} \geq \beta \lVert q \rVert_Q \quad \Forall q \in Q,
 \end{gather}
+
+with the latter known as the \textit{inf-sup} property.

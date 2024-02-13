@@ -1,0 +1,58 @@
+For the FEM discretization of the Stokes problem, we seek $\Vector{u_h} \in V_h$ and $p_h \in Q_h$ such that the following holds:
+
+\begin{gather} \label{fem_stokes}
+    \begin{cases}
+        \boa{\Vector{u_h}}{\Vector{v_h}} + \bob{\Vector{v_h}}{p_h} = \langle \Vector{f}, \Vector{v_h} \rangle & \Forall \Vector{v_h} \in V_h, \\
+        \bob{\Vector{u_h}}{q_h} = 0 & \Forall q_h \in Q_h.
+    \end{cases}
+\end{gather}
+
+Considering $Z_h$, \eqref{kernel_stokes} can be rewritten as follows:
+
+\begin{gather} \label{fem_kernel}
+    \boa{\Vector{u_h}}{\Vector{v_h}} = \langle \Vector{f}, \Vector{v_h} \rangle \quad \Forall \Vector{v_h} \in V_h.
+\end{gather}
+
+We must prove that the bilinear operator $\boa{\cdot}{\cdot}$ is coercive on $Z_h$ as well, considering that we cannot ensure that $Z_h \in Z$. Furthermore, since $V_h$ is smaller than $V$, even \eqref{inf-sup} needs to be revised. 
+
+We observe that, according to \eqref{a}, $\boa{\cdot}{\cdot}$ is coercive on the entirety of $V$ and thus on $Z_h$. We will, however, demonstrate the \textit{inf-sup} property on the Crouzeix-Raviart, as defined later, since it depends on the element.
+
+\subsection{Matrix reformulation}
+
+Let $\left\{ \Vector{\phi_i} \right\}_{i = 1}^N$ and $\left\{ \Vector{\psi_i} \right\}_{i = 1}^M$ denote bases for spaces $V_h$ and $Q_h$ respectively. Then, we express $\Vector{u_h}$ and $p_h$ as:
+
+\begin{align}
+    \Vector{u_h} &= \sum_{i = 1}^N \upsilon_i \Vector{\phi_i} \quad \Forall \Vector{u_h} \in V_h, \\
+    p_h &= \sum_{i = 1}^M \pi_i \psi_i \quad \Forall p_h \in Q_h,
+\end{align}
+
+so that we aim to find $\Vector{\upsilon} \in \R^N$ and $\Vector{\pi} \in \R^M$ such that:
+
+\begin{gather} \label{matrix_stokes}
+    \begin{cases}
+        \MA \Vector{\upsilon} + \MB \Vector{\pi} = \VF, \\
+        \MB^\intercal \Vector{\upsilon} = 0,
+    \end{cases}
+\end{gather}
+
+where $\MA \in \R^{N \times N}$, $\MB \in \R^{N \times M}$, and $\VF \in \R^N$ are defined as:
+
+\begin{align}
+    \MA_{ij} &= \boa{\Vector{\phi_i}}{\Vector{\phi_j}}, \\ 
+    \MB_{ij} &= \bob{\Vector{\phi_i}}{\psi_j}, \\
+    \VF_i &= \langle \Vector{f}, \Vector{\phi_i} \rangle.
+\end{align}
+
+\newpage
+\subsection{Discrete \textit{inf-sup} property}
+
+Consider the following result.
+
+\begin{lemma}[Fortin] \label{fortin}
+    Let $(V, Q)$ be spaces for the Stokes problem for which we have the continuos \textit{inf-sup} property, and let $(V_h, Q_h)$ be the discrete spaces. Let $\fortin: V \rightarrow V_h$ such that for all $\Vector{v} \in V$:
+    \begin{enumerate}[i.]
+        \item There exists $C \in \R_+$ such that $\lVert \fortin \Vector{v} \rVert_V \leq C \lVert \Vector{v} \rVert_V$,
+        \item $\bob{\fortin \Vector{v}}{q_h} = \bob{\Vector{v}}{q_h}$ for all $q_h \in Q_h$,
+    \end{enumerate}
+    then we have the discrete \textit{inf-sup} property for $(V_h, Q_h)$.
+\end{lemma}
