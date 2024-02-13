@@ -6,9 +6,12 @@
 
 report/output
 
-# Final package.
+# Images.
+gallery/errorTrend.pdf
+gallery/errorTrendNB.pdf
 
-package
+# Results.
+results/
 
 # Others.
 
