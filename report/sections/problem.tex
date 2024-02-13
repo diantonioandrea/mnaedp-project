@@ -36,7 +36,7 @@ where $\boa{\cdot}{\cdot}: V \times V \rightarrow \mathbb{R}$ and $\bob{\cdot}{\
     \bob{\Vector{v}}{p} &= \int_{\Omega} \diver \Vector{v} ~ p ~ d \omega. \label{b}
 \end{align}
 
-Let $Z = \{\Vector{v} \in V: \bob(\Vector{v}, q) = 0 \text{ for all } q \in Q\}$. The goal is to find $\Vector{u} \in Z$ satisfying:
+Let $Z = \{\Vector{v} \in V: \bob(\Vector{v}, q) = 0 \text{ for all } q \in Q\}$. Consider:
 
 \begin{gather} \label{kernel_stokes}
     \boa{\Vector{u}}{\Vector{v}} = \langle \Vector{f}, \Vector{v} \rangle \quad \Forall \Vector{v} \in V
@@ -48,10 +48,10 @@ This problem is well-posed provided that there exist $\alpha, \beta \in \mathbb{
     \boa{\Vector{u}}{\Vector{v}} \geq \alpha \lVert \Vector{u} \rVert^2_V \quad \Forall \Vector{u} \in Z,
 \end{gather}
 
-and:
+which implies existence and unicity for \eqref{kernel_stokes}, and:
 
 \begin{gather} \label{inf-sup}
     \sup_{\Vector{v} \in V} \frac{\bob{\Vector{v}}{q}}{\lVert \Vector{v} \rVert_V} \geq \beta \lVert q \rVert_Q \quad \Forall q \in Q,
 \end{gather}
 
-with the latter known as the \textit{inf-sup} property.
+with the latter known as the \textit{inf-sup} property which implies unicity for \eqref{weak_stokes}.
