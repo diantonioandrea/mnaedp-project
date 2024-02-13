@@ -1,4 +1,6 @@
-For the FEM discretization of the Stokes problem, we seek $\Vector{u_h} \in V_h$ and $p_h \in Q_h$ such that the following holds:
+\subsection{FEM Discretization}
+
+For the FEM discretization of the Stokes problem, the objective is to find $\Vector{u_h} \in V_h$ and $p_h \in Q_h$ such that the following holds:
 
 \begin{gather} \label{fem_stokes}
     \begin{cases}
@@ -13,11 +15,11 @@ Considering $Z_h$, \eqref{kernel_stokes} can be rewritten as follows:
     \boa{\Vector{u_h}}{\Vector{v_h}} = \langle \Vector{f}, \Vector{v_h} \rangle \quad \Forall \Vector{v_h} \in V_h.
 \end{gather}
 
-We must prove that the bilinear operator $\boa{\cdot}{\cdot}$ is coercive on $Z_h$ as well, considering that we cannot ensure that $Z_h \in Z$. Furthermore, since $V_h$ is smaller than $V$, even \eqref{inf-sup} needs to be revised. 
+It is necessary to prove that the bilinear operator $\boa{\cdot}{\cdot}$ is coercive on $Z_h$ as well, considering that $Z_h$ may not be in $Z$. Furthermore, since $V_h$ is smaller than $V$, even \eqref{inf-sup} needs to be revised. 
 
-We observe that, according to \eqref{a}, $\boa{\cdot}{\cdot}$ is coercive on the entirety of $V$ and thus on $Z_h$. We will, however, demonstrate the \textit{inf-sup} property on the Crouzeix-Raviart, as defined later, since it depends on the element.
+Observing that, according to \eqref{a}, $\boa{\cdot}{\cdot}$ is coercive on the entirety of $V$ and thus on $Z_h$, it suffices to demonstrate the \textit{inf-sup} property on the Crouzeix-Raviart, as defined later.
 
-\subsection{Matrix reformulation}
+\subsection{Matrix Reformulation}
 
 Let $\left\{ \Vector{\phi_i} \right\}_{i = 1}^N$ and $\left\{ \Vector{\psi_i} \right\}_{i = 1}^M$ denote bases for spaces $V_h$ and $Q_h$ respectively. Then, we express $\Vector{u_h}$ and $p_h$ as:
 
@@ -44,15 +46,17 @@ where $\MA \in \R^{N \times N}$, $\MB \in \R^{N \times M}$, and $\VF \in \R^N$ a
 \end{align}
 
 \newpage
-\subsection{Discrete \textit{inf-sup} property}
+\subsection{Discrete \textit{inf-sup} Property}
 
 Consider the following result.
 
 \begin{lemma}[Fortin] \label{fortin}
-    Let $(V, Q)$ be spaces for the Stokes problem for which we have the continuos \textit{inf-sup} property, and let $(V_h, Q_h)$ be the discrete spaces. Let $\fortin: V \rightarrow V_h$ such that for all $\Vector{v} \in V$:
+    Let $(V, Q)$ be spaces for the Stokes problem for which the continuous \textit{inf-sup} property holds, and let $(V_h, Q_h)$ be the discrete spaces. Let $\fortin: V \rightarrow V_h$ such that for all $\Vector{v} \in V$:
     \begin{enumerate}[i.]
         \item There exists $C \in \R_+$ such that $\lVert \fortin \Vector{v} \rVert_V \leq C \lVert \Vector{v} \rVert_V$,
         \item $\bob{\fortin \Vector{v}}{q_h} = \bob{\Vector{v}}{q_h}$ for all $q_h \in Q_h$,
     \end{enumerate}
-    then we have the discrete \textit{inf-sup} property for $(V_h, Q_h)$.
+    then the discrete \textit{inf-sup} property holds for $(V_h, Q_h)$.
 \end{lemma}
+
+Verifying this property for the Crouzeix-Raviart element is necessary to ensure its well-posedness.

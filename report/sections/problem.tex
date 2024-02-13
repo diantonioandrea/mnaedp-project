@@ -1,6 +1,6 @@
 \subsection{Strong formulation}
 
-Let $\Omega = [0, 1] \times [0, 1] \subset \mathbb{R}^2$ denote our domain. We aim to find $\Vector{u} \in \left[ C^2(\Omega) \right]^2$ and $p \in C^1(\Omega)$ such that, given $\Vector{f} \in \left[ C(\Omega) \right]^2$, the following holds:
+Consider the domain $\Omega = [0, 1] \times [0, 1] \subset \mathbb{R}^2$. The aim is to find $\Vector{u} \in \left[ C^2(\Omega) \right]^2$ and $p \in C^1(\Omega)$ such that, for any $\Vector{f} \in \left[ C(\Omega) \right]^2$, the following equations hold:
 
 \begin{gather}
     \begin{cases} \label{strong_stokes}
@@ -20,7 +20,7 @@ where:
 
 \subsection{Weak formulation}
 
-We now seek $\Vector{u} \in \left[ H^1_0(\Omega) \right]^2 = V$ and $p \in L^2_0(\Omega) = Q$ such that, given $\Vector{f} \in V^*$, we have:
+Now, seeking $\Vector{u} \in \left[ \HO_0(\Omega) \right]^2 = V$ and $p \in L^2_0(\Omega) = Q$ such that, given $\Vector{f} \in V^*$, the following equations are satisfied:
 
 \begin{gather} \label{weak_stokes}
     \begin{cases}
@@ -36,7 +36,7 @@ where $\boa{\cdot}{\cdot}: V \times V \rightarrow \mathbb{R}$ and $\bob{\cdot}{\
     \bob{\Vector{v}}{p} &= \int_{\Omega} \diver \Vector{v} ~ p ~ d \omega. \label{b}
 \end{align}
 
-Let $Z = \{\Vector{v} \in V: \bob(\Vector{v}, q) = 0 \Forall q \in Q\}$. We aim to find $\Vector{u} \in Z$ satisfying:
+Let $Z = \{\Vector{v} \in V: \bob(\Vector{v}, q) = 0 \text{ for all } q \in Q\}$. The goal is to find $\Vector{u} \in Z$ satisfying:
 
 \begin{gather} \label{kernel_stokes}
     \boa{\Vector{u}}{\Vector{v}} = \langle \Vector{f}, \Vector{v} \rangle \quad \Forall \Vector{v} \in V
