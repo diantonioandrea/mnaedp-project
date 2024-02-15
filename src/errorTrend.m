@@ -81,12 +81,8 @@ function errorTrend(~)
 
 	fprintf(fileID, "\nVelocity, L2 Error fit: %.2f\n", coeffs(1));
 
-	title("L^2 Error: Velocity")
-
-	xlabel("h");
-	ylabel("L^2 error")
-
 	% H1 error (velocity).
+	set(gca, 'XTick', []);
 	nexttile;
 
 	loglog(sizes, h1Errors, "DisplayName", "Numerical error", ...
@@ -112,12 +108,8 @@ function errorTrend(~)
 
 	fprintf(fileID, "Velocity, H1 Error fit: %.2f\n", coeffs(1));
 
-	title("H^1 Error: Velocity")
-
-	xlabel("h");
-	ylabel("H^1 error")
-
 	% L2 error (pressure).
+	set(gca, 'XTick', []);
 	nexttile;
 
 	loglog(sizes, l2ErrorsP, "DisplayName", "Numerical error", ...
@@ -133,7 +125,7 @@ function errorTrend(~)
 		"--", "DisplayName", "Tail polynomial interpolation", ...
 		"LineWidth", 1, "Color", red);
 
-	fprintf(fileID, "Pressure, L2 Tail error fit: %.2f\n", coeffs(1));
+	fprintf(fileID, "Pressure, L2 Tail fit: %.2f\n", coeffs(1));
 
 	% Linear slope.
 	shift = exp(coeffs(2)) * (sizes(1) ^ coeffs(1)) / sizes(1);
@@ -147,10 +139,7 @@ function errorTrend(~)
 		"--", "DisplayName", "Quadratic slope", ...
 		"LineWidth", 1, "Color", blue);
 
-	title("L^2 Error: Pressure")
-
-	xlabel("h");
-	ylabel("L^2 error")
+	set(gca, 'XTick', []);
 
 	% Close the file
 	fclose(fileID);

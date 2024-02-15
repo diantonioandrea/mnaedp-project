@@ -7,4 +7,7 @@ function reload
 
     errorTrend(1);
     close("all");
+
+    meshinfo;
+    meshinfo(1);
 end

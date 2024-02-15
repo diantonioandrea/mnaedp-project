@@ -7,8 +7,10 @@ A cubic trend can be observed for the velocity $\LT$ error, and a quadratic tren
 \begin{figure}[!ht]
 	\centering
 	\includegraphics[width=15cm]{errorTrend.pdf}
-	\caption{Error trend.}
+	\caption{Error trend for the Crouzeix-Raviart element.}
 \end{figure}
+
+From left to right: $\LT$ error on velocity, $\HO$ error on velocity, and $\LT$ error on pressure. Mesh size on the $X$ axis.
 
 \newpage
 \subsection{Bubbleless error trend}
@@ -18,13 +20,24 @@ By eliminating the cubic bubble from the velocity elements, new error trends can
 \begin{figure}[!ht]
 	\centering
 	\includegraphics[width=15cm]{errorTrendNB.pdf}
-	\caption{Bubbleless error trend.}
+	\caption{Error trend for the bubbleless Crouzeix-Raviart element.}
 \end{figure}
 
 \newpage
+\subsection{Mesh informations}
+
+Here is some information on the meshes for the two methods.
+
+\begin{multicols}{2}
+	\lstinputlisting{../results/info.txt}
+	\lstinputlisting{../results/infoNB.txt}
+\end{multicols}
+
 \subsection{Polynomial fits}
 
-Here are the results for the polynomial fits. Given the relatively low pressure error on the initial mesh, an additional fit is performed solely on the tail. 
+Here are the results for the polynomial fits. Given the relatively low pressure error on the initial mesh, an additional fit is performed solely on the tail. It can be observed that there is a quadratic error trend for the Crouzeix-Raviart element and the importance of the bubble as the convergence slows down when it is removed.
 
-\lstinputlisting[caption=Polynomial fits.]{../results/errorTrend.txt}
-\lstinputlisting[caption=Bubbleless polynomial fits.]{../results/errorTrendNB.txt}
+\begin{multicols}{2}
+	\lstinputlisting{../results/errorTrend.txt}
+	\lstinputlisting{../results/errorTrendNB.txt}
+\end{multicols}
