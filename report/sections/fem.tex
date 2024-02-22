@@ -44,19 +44,3 @@ where $\MA \in \R^{N \times N}$, $\MB \in \R^{N \times M}$, and $\VF \in \R^N$ a
     \MB_{ij} &= \bob{\Vector{\phi_i}}{\psi_j}, \\
     \VF_i &= \langle \Vector{f}, \Vector{\phi_i} \rangle.
 \end{align}
-
-\newpage
-\subsection{Discrete \textit{inf-sup} Property}
-
-Consider the following result.
-
-\begin{lemma}[Fortin] \label{fortin}
-    Let $(V, Q)$ be spaces for the Stokes problem for which the continuous \textit{inf-sup} property holds, and let $(V_h, Q_h)$ be the discrete spaces. Let $\fortin: V \rightarrow V_h$ such that for all $\Vector{v} \in V$:
-    \begin{enumerate}[i.]
-        \item There exists $C \in \R_+$ such that $\lVert \fortin \Vector{v} \rVert_V \leq C \lVert \Vector{v} \rVert_V$,
-        \item $\bob{\fortin \Vector{v}}{q_h} = \bob{\Vector{v}}{q_h}$ for all $q_h \in Q_h$,
-    \end{enumerate}
-    then the discrete \textit{inf-sup} property holds for $(V_h, Q_h)$.
-\end{lemma}
-
-Verifying this property for the Crouzeix-Raviart element is necessary to ensure its well-posedness.

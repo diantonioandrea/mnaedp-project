@@ -15,7 +15,21 @@ where $b_T \in \PK{3}(T)$ such that $b_T \vert_{\partial T} = 0$ and $b_T(\nu_T)
 
 \subsection{Fortin Operator}
 
-Let $\tfortin: V \rightarrow V_h$ such that:
+Consider the following result.
+
+\begin{lemma}[Fortin] \label{fortin}
+    Let $(V, Q)$ be spaces for the Stokes problem for which the continuous \textit{inf-sup} property holds, and let $(V_h, Q_h)$ be the discrete spaces. Let $\fortin: V \rightarrow V_h$ such that for all $\Vector{v} \in V$:
+    \begin{enumerate}[i.]
+        \item There exists $C \in \R_+$ such that $\lVert \fortin \Vector{v} \rVert_V \leq C \lVert \Vector{v} \rVert_V$,
+        \item $\bob{\fortin \Vector{v}}{q_h} = \bob{\Vector{v}}{q_h}$ for all $q_h \in Q_h$,
+    \end{enumerate}
+    then the discrete \textit{inf-sup} property holds for $(V_h, Q_h)$.
+\end{lemma}
+
+Verifying this property for the Crouzeix-Raviart element is necessary to ensure its well-posedness.
+
+\newpage
+\noindent Let $\tfortin: V \rightarrow V_h$ such that:
 
 \begin{gather}
     \tfortin \Vector{v} \vert_T = \frac{1}{\theta_T} \left[ \int_T \diver \Vector{v} \begin{pmatrix}
@@ -30,11 +44,10 @@ the Fortin operator $\fortin: V \rightarrow V_h$ for the Crouzeix-Raviart elemen
     \fortin \Vector{v} = \fortinptpz \Vector{v} + \tfortin \left( \Vector{v} - \fortinptpz \Vector{v}\right),
 \end{gather}
 
-where $\fortinptpz$ is the Fortin operator for the $\PK{2}-\PK{0}$ element.
+where $\fortinptpz$ is the Fortin operator for the $\PK{2}\PK{0}$ element.
 
 $\fortin$ satisfies the hypothesis of the \nameref{fortin} lemma, ensuring the discrete \textit{inf-sup} property for the Crouzeix-Raviart element.
 
-\newpage
 \subsection{Convergence}
 
 The following result can be stated:
