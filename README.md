@@ -1,19 +1,21 @@
 # Metodi Numerici Avanzati per Equazioni alle Derivate Parziali
 
-Codici per l'esame del corso **Metodi Numerici Avanzati per Equazioni alle Derivate Parziali**.
+Codes for the examination of the **Metodi Numerici Avanzati per Equazioni alle Derivate Parziali**[^1] course at **UniMiB**.
 
-Implementazione dell'Elemento di Crouzeix-Raviart per risolvere il problema di Stokes con dati al bordo di Dirichlet omogenei.
+[^1]: Advanced Numerical Methods for Partial Differential Equations.
 
-## Contenuto
+Implementation of the Crouzeix-Raviart Element to solve the Stokes problem with homogeneous Dirichlet boundary data.
+
+## Contents
 
 - `/src/*`
-    - `/src/solver.m` Implementazione del risolutore per il problema di Stokes sulla mesh.
-    - `/src/basis.m` Funzioni di base per la velocità.
-    - `/src/gradbasis.m` Calcolo dei gradienti delle funzioni di base per la velocità.
-    - `/src/pressurebasis.m` Funzioni di base per la pressione.
-    - `/src/loading.m` Definizione della sorgente.
-    - `/src/exact.m` Implementazione della soluzione esatta per la sorgente specificata.
-    - `/src/quadrature.m` Nodi di quadratura per l'elemento di riferimento.
-    - `/src/errorTrend.m` Generazione di grafici per visualizzare l'andamento degli errori.
-    - `/src/reload.m` Wrapper per la funzione errorTrend.
-    - `/src/quadmeshes.mat` Mesh predefinite.
+    - `/src/solver.m` Solver implementation for the Stokes problem on the mesh.
+    - `/src/basis.m` Basis functions for velocity.
+    - `/src/gradbasis.m` Computation of gradients of basis functions for velocity.
+    - `/src/pressurebasis.m` Basis functions for pressure.
+    - `/src/loading.m` Source definition.
+    - `/src/exact.m` Implementation of the exact solution for the specified source.
+    - `/src/quadrature.m` Quadrature nodes for the reference element.
+    - `/src/errorTrend.m` Generation of plots to visualize error trends.
+    - `/src/reload.m` Wrapper for the errorTrend function.
+    - `/src/quadmeshes.mat` Predefined mesh.
