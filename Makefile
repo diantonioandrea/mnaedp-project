@@ -1,4 +1,6 @@
+.PHONY: clean
+
 clean:
-	rm -rf results
-	rm -rf report/output
-	rm gallery/errorTrend*
+	$(RM) -r results
+	$(RM) -r report/output
+	$(RM) gallery/errorTrend*
