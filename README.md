@@ -17,5 +17,7 @@ Implementation of the Crouzeix-Raviart Element to solve the Stokes problem with 
     - `/src/exact.m` Implementation of the exact solution for the specified source.
     - `/src/quadrature.m` Quadrature nodes for the reference element.
     - `/src/errorTrend.m` Generation of plots to visualize error trends.
+    - `/src/meshinfo.m` Sizes and DOFs info.
     - `/src/reload.m` Wrapper for the errorTrend function.
     - `/src/quadmeshes.mat` Predefined mesh.
+    
