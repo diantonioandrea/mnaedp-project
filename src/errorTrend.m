@@ -81,6 +81,9 @@ function errorTrend(~)
 
 	fprintf(fileID, "\nVelocity, L2 Error fit: %.2f\n", coeffs(1));
 
+	coeffs = polyfit(log(sizes(2:end)), log(l2Errors(2:end)), 1);
+	fprintf(fileID, "Velocity, L2 Tail fit: %.2f\n", coeffs(1));
+
 	% H1 error (velocity).
 	set(gca, 'XTick', []);
 	nexttile;
@@ -106,7 +109,10 @@ function errorTrend(~)
 		"--", "DisplayName", "Quadratic slope", ...
 		"LineWidth", 1, "Color", blue);
 
-	fprintf(fileID, "Velocity, H1 Error fit: %.2f\n", coeffs(1));
+	fprintf(fileID, "\nVelocity, H1 Error fit: %.2f\n", coeffs(1));
+
+	coeffs = polyfit(log(sizes(2:end)), log(h1Errors(2:end)), 1);
+	fprintf(fileID, "Velocity, H1 Tail fit: %.2f\n", coeffs(1));
 
 	% L2 error (pressure).
 	set(gca, 'XTick', []);
@@ -118,7 +124,7 @@ function errorTrend(~)
 
 	coeffs = polyfit(log(sizes), log(l2ErrorsP), 1);
 
-	fprintf(fileID, "Pressure, L2 Error fit: %.2f\n", coeffs(1));
+	fprintf(fileID, "\nPressure, L2 Error fit: %.2f\n", coeffs(1));
 
 	coeffs = polyfit(log(sizes(2:end)), log(l2ErrorsP(2:end)), 1);
 	loglog(sizes, exp(coeffs(2)) * (sizes .^ coeffs(1)), ...
