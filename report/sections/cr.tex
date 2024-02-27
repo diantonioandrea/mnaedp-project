@@ -13,6 +13,8 @@ Let $\{\Tau_h\}_h$ be a sequence of shape-regular and quasi-uniform meshes. Defi
 
 where $b_T \in \PK{3}(T)$ such that $b_T \vert_{\partial T} = 0$ and $b_T(\nu_T) = 1 ~ \Forall T \in \Tau_h$:
 
+The degrees of freedom for the velocity element are determined by the second-order Lagrange nodes and the third-order centroid node for $b_T$. Meanwhile, the DOFs for the pressure element correspond to the coefficients of first-order polynomials within the basis set $\left\{ 1, x - x_T, y - y_T \right\}$.
+
 \subsection{Fortin Operator}
 
 Consider the following result.
